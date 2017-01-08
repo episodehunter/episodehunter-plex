@@ -1,8 +1,104 @@
 <html>
 <head>
-<title>Example App</title>
+  <title>Episodehunter</title>
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+  <style>
+  body {
+  font-family: 'Open Sans', sans-serif;
+  margin: 0;
+  /*background-color: black;*/
+  }
+  #sandbox {
+  background: white;
+  /*width: 340px;
+  height: 340px;
+  margin: 0 auto;*/
+  padding: 10px 30px;
+  }
+  #logo {
+  display: flex;
+  justify-content: center;
+  }
+  #logo img {
+  width: 50px;
+  height: 50px;
+  }
+  input {
+  padding: 4px;
+  font-size: 14;
+      width: 100%;
+  }
+    input:focus {
+      outline: none;
+    }
+  .from-row {
+  margin: 10px 0;
+  }
+    #form-wrapper {
+      display: flex;
+  justify-content: center;
+    }
+    form {
+      display: inline-block;
+    }
+  button {
+  padding: 0.5rem 1.2rem;
+  color: white;
+  display: inline-block;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  letter-spacing: 1px;
+  transition: background-color 0.1s linear;
+  outline: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 200;
+  border-radius: 0;
+  background-color: #03a37e;
+  }
+  button:hover {
+  background-color: #00d4a3;
+  }
+    label {
+      display: block;
+    }
+  </style>
 </head>
 <body>
-  hello world!!
+  <div id="sandbox">
+  <div id="logo">
+  <img src="logo.png">
+  </div>
+    <div id="form-wrapper">
+      <form>
+        <div class="from-row">
+          <label>Hostname / ip:</label>
+          <input type="text" name="host" placeholder="hostname / ip" value="localhost">
+        </div>
+        <div class="from-row">
+          <label>Port:</label>
+          <input type="number" name="port" placeholder="port" value="32400"></
+        </div>
+        <div class="from-row">
+          <label>Plex username:</label>
+          <input type="text" name="plexUsername" placeholder="Plex username" value="">
+        </div>
+        <div class="from-row">
+          <label>Plex password:</label>
+          <input type="password" name="plexPassword" placeholder="Plex password" value="">
+        </div>
+        <div class="from-row">
+          <label>Episodehunter username:</label>
+          <input type="text" name="ehUsername" placeholder="Episodehunter username" value="">
+        </div>
+        <div class="from-row">
+          <label>Episodehunter api key:</label>
+          <input type="text" name="ehApiKey" placeholder="Episodehunter api key" value="">
+        </div>
+        <button id="login-button">Login</button>
+      </form>
+    </div>
+  </div>
 </body>
+<script src="app.js"></script>
 </html>
