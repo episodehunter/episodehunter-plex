@@ -1,4 +1,5 @@
 var menubar = require('menubar');
+require('electron-reload')(__dirname);
 
 var mb = menubar({
   width: 300,

@@ -14,7 +14,11 @@
   "author": "Oskar Karlsson <kontakta@oskarkarlsson.nu>",
   "license": "MIT",
   "dependencies": {
-    "menubar": "^5.2.0"
+    "@types/node": "^6.0.58",
+    "electron-config": "^0.2.1",
+    "electron-reload": "^1.1.0",
+    "menubar": "^5.2.0",
+    "rxjs": "^5.0.3"
   },
   "devDependencies": {
     "electron": "^1.4.13"
