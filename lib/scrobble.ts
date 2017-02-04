@@ -16,9 +16,25 @@ interface PlexEvent {
   NotificationContainer: {
       type: 'playing';
       PlaySessionStateNotification: {
+        key: string;
         viewOffset: number;
         state: PlayState;
       }[];
+  };
+}
+
+interface PlexMetadata {
+  MediaContainer: {
+    Metadata: {
+      guid: string; // com.plexapp.agents.thetvdb://260449/4/18?lang=en
+      type: string; // episode
+      title: string; // Revenge
+      index: number; // 18
+      parentIndex: number; // 4
+      viewOffset: number; // 104519,
+      year: number; // 2017
+      duration: number; // 2610149;
+    }[];
   };
 }
 
@@ -54,15 +70,18 @@ interface Playing {
 }
 
 interface PlayingState {
-  duration: string;
   viewOffset: number;
+  playState: PlayState;
+  key: string;
 };
 
+export const credentials$ = new Subject<PlexServerCredentials>();
+
 function satisfiedCredentials(credentials: PlexServerCredentials) {
-  return Object.values(credentials).every(v => !!v);
+  return Object.keys(credentials).every(key => credentials[key]);
 }
 
-function credentialsCompare(a: PlexServerCredentials, b: PlexServerCredentials) {
+function shallowObjectCompare(a, b) {
   return Object.keys(a).every(key => a[key] === b[key]);
 }
 
@@ -71,69 +90,83 @@ function createPlexServerUrl(credentials: PlexServerCredentials) {
   return `ws://${host}:${port}/:/websockets/notifications?X-Plex-Token=${plexToken}`;
 }
 
-function createPlexServerSessionsStatusUrl(credentials: PlexServerCredentials) {
-  const { plexToken, host, port } = credentials;
-  return {
-    url: `http://${host}:${port}/status/sessions`,
-    header: { Accept: 'application/json', 'X-Plex-Token': plexToken }
-  };
+function getSessionKey(event: PlexEvent) {
+  return event.NotificationContainer.PlaySessionStateNotification[0].key;
 }
 
-function mapSessionEventToPlayingState(event: PlexEvent) {
-  return event.NotificationContainer.PlaySessionStateNotification[0].state;
+function viewOffset(event: PlexEvent) {
+  return event.NotificationContainer.PlaySessionStateNotification[0].viewOffset;
 }
 
 function parsePlexGuid(plexGuid: string) {
   return /\/\/(\d+)\/(\d+)\/(\d+)/g.exec(plexGuid);
 }
 
-function mapSessionToShow(session: PlexSessionState) {
-  const [, theTvDbId, season, episode ] = parsePlexGuid(session.MediaContainer.Video[0].guid);
+function hasStoptPlayingEvent(plexEvent: PlexEvent) {
+  return plexEvent.NotificationContainer.type === 'playing' && plexEvent.NotificationContainer.PlaySessionStateNotification[0].state === 'stopped';
+}
+
+const mapMetadataToShow = (metadata: PlexMetadata) => {
+  const [, theTvDbId, season, episode ] = parsePlexGuid(metadata.MediaContainer.Metadata[0].guid);
   return {
     theTvDbId,
     season,
     episode,
-    duration: Number(session.MediaContainer.Video[0].duration),
-    viewOffset: Number(session.MediaContainer.Video[0].viewOffset),
-    playState: 'playing' as PlayState
+    duration: metadata.MediaContainer.Metadata[0].duration,
+    // viewOffset: metadata.MediaContainer.Metadata[0].viewOffset
   } as Show;
-}
+};
 
-function isPlayingEvent(plexEvent: PlexEvent) {
-  return plexEvent.NotificationContainer.type === 'playing';
-}
+const mediaMetadata$ = (credentials: PlexServerCredentials) => {
+  const { plexToken, host, port } = credentials;
+  const url = `http://${host}:${port}`;
+  const header = { Accept: 'application/json', 'X-Plex-Token': plexToken };
+  return (sessionKey: string) => {
+    return ajax.get(url + sessionKey, header).map(response => response.response).map(mapMetadataToShow);
+  };
+};
 
-function accumulatePlayTime(acc: Playing, event) {
-  return acc;
-}
-
-const credentials$ = new Subject<PlexServerCredentials>();
+const scrobbleToEpisodehunter$ = (credentials: PlexServerCredentials) => {
+  // const { ehToken } = credentials;
+  // const url = `https://episodehunter.tv/shomething`;
+  // const header = { Accept: 'application/json', 'yolo': ehToken };
+  return (episode: Show) => {
+    return Observable.of(episode).do(() => console.log('Have now scrobbled!', episode));
+    // return ajax.post(url, episode, header);
+  };
+};
 
 const credentialsChanges$ = credentials$
+  .do(() => console.log('filter satisfiedCredentials'))
   .filter(satisfiedCredentials)
-  .distinctUntilChanged(credentialsCompare);
-
-const sessionsStatus$ = (credentials: PlexServerCredentials) => {
-  const { url, header } = createPlexServerSessionsStatusUrl(credentials);
-  return () => ajax.get(url, header).map(response => response.response).map(mapSessionToShow);
-}
+  .do(() => console.log('distinctUntilChanged shallowObjectCompare'))
+  .distinctUntilChanged(shallowObjectCompare);
 
 const watching$ = (credentials: PlexServerCredentials) => {
   return webSocket(createPlexServerUrl(credentials))
-    .filter(isPlayingEvent)
-    .map(mapSessionEventToPlayingState)
-    .distinctUntilChanged()
-    .switchMap(playState => {
-      if (playState === 'playing') {
-        return sessionsStatus$(credentials)();
-      }
-      return Observable.of({ playState } as Show);
+    .do(() => console.log('filter hasStoptPlayingEvent'))
+    .filter(hasStoptPlayingEvent)
+    .do(() => console.log('map getSessionKey'))
+    // .map(getSessionKey)
+    .do(() => console.log('concatMap mediaMetadata$'))
+    .concatMap((plexEvent: PlexEvent) => {
+      return mediaMetadata$(credentials)(getSessionKey(plexEvent)).map(show => Object.assign(show, { viewOffset: viewOffset(plexEvent) }));
     })
-    .scan(accumulatePlayTime);
+    .do(show => console.log('filter watched', show))
+    .filter(show => show.viewOffset / show.duration > .7)
+    .do(() => console.log('concatMap scrobbleToEpisodehunter$'))
+    .concatMap(show => {
+      return scrobbleToEpisodehunter$(credentials)(show);
+    });
 }
 
 credentialsChanges$
+  .do(() => console.log('switchMap watching$'))
   .switchMap(credentials => {
-    return webSocket(createPlexServerUrl(credentials));
+    return watching$(credentials);
   })
-  .filter();
+  .subscribe(
+    next => console.log(next),
+    error => console.log(error),
+    () => console.log('Done')
+  );
