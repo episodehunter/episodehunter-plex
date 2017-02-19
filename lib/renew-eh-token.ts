@@ -12,18 +12,20 @@ export function requestNewIdToken(idToken: string): Observable<string> {
     scope: 'openid'
   };
   return ajax.post(url, body, header)
-    .map(response => {
+    .map(response => response.response)
+    .catch(response => {
       const status = response.status;
+      console.log('Get result from server. Status', status);
       if (status === 401) {
         throw new Unauthorized();
-      } else if (status < 200 || status > 299) {
-        throw new Error();
       }
-      return response.response;
+      throw new Error();
     })
     .retryWhen(error$ => {
+      console.log('FEL!');
       return error$
         .map(error => {
+          console.log('FEL!', error instanceof Unauthorized);
           if (error instanceof Unauthorized) {
             throw error;
           }

@@ -68,7 +68,10 @@ export function checkCredentials$(
     return Observable
       .concat(plex$, eh$)
       .every(val => val)
-      .do(() => {
-        setErrorMessage(null);
+      .do(val => {
+        if (val) {
+          console.log('Everyting whent well', val);
+          setErrorMessage(null);
+        }
       });
   }
