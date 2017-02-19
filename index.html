@@ -12,6 +12,10 @@
       background: white;
       padding: 10px 30px;
     }
+    #app {
+      flex: 1 1 auto;
+      display: flex;
+    }
     #logo {
       display: flex;
       justify-content: center;
@@ -63,39 +67,10 @@
 </head>
 <body>
   <div id="sandbox">
-  <div id="logo">
-  <img src="logo.png">
-  </div>
-    <div id="form-wrapper">
-      <form>
-        <div class="from-row">
-          <label>Plex hostname / ip:</label>
-          <input type="text" name="host" placeholder="hostname / ip" value="localhost">
-        </div>
-        <div class="from-row">
-          <label>Plex Port:</label>
-          <input type="number" name="port" placeholder="port" value="32400"></
-        </div>
-        <div class="from-row">
-          <label>Plex username:</label>
-          <input type="text" name="plexUsername" placeholder="Plex username" value="">
-        </div>
-        <div class="from-row">
-          <label>Plex password:</label>
-          <input type="password" name="plexPassword" placeholder="Plex password" value="">
-        </div>
-        <div class="from-row">
-          <label>Episodehunter username:</label>
-          <input type="text" name="ehUsername" placeholder="Episodehunter username" value="">
-        </div>
-        <div class="from-row">
-          <label>Episodehunter api key:</label>
-          <input type="text" name="ehApiKey" placeholder="Episodehunter api key" value="">
-        </div>
-        <button id="login-button">Login</button>
-        <button id="show-lock">Login into eh</button>
-      </form>
+    <div id="logo">
+      <img src="logo.png">
     </div>
+    <div id="app"></div>
   </div>
 </body>
 <script src="https://cdn.auth0.com/js/lock/10.9.1/lock.min.js"></script>

@@ -4,8 +4,9 @@
     "target": "es6",
     "noImplicitAny": false,
     "sourceMap": true,
-    "lib": ["es2015", "dom"],
+    "lib": ["es2017", "dom"],
     "types" : ["node"],
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "jsx" : "react"
   }
 }

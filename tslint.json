@@ -1,4 +1,5 @@
 {
+  "extends": ["tslint-react"],
    "rules":{
       "align":[
          true,
@@ -72,10 +73,11 @@
          "check-whitespace"
       ],
       "quotemark":[
-         true,
+         false,
          "single",
          "avoid-escape"
       ],
+      "jsx-quotes": ["error", "prefer-double"],
       "radix":true,
       "semicolon":true,
       "switch-default":true,
