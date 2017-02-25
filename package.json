@@ -4,7 +4,7 @@
   "description": "Plex service for episodehunter",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "start": "electron ."
   },
   "keywords": [
@@ -14,21 +14,40 @@
   "author": "Oskar Karlsson <kontakta@oskarkarlsson.nu>",
   "license": "MIT",
   "dependencies": {
+    "electron": "^1.4.13",
     "electron-config": "^0.2.1",
     "electron-packager": "^8.5.0",
     "electron-reload": "^1.1.0",
-    "electron": "^1.4.13",
+    "lodash.isequal": "^4.5.0",
     "menubar": "^5.2.0",
-    "react-dom": "^15.4.2",
     "react": "^15.4.2",
+    "react-dom": "^15.4.2",
     "rxjs": "^5.0.3"
   },
   "devDependencies": {
+    "@types/jest": "^18.1.1",
     "@types/node": "^6.0.58",
-    "@types/react-dom": "^0.14.20",
     "@types/react": "^15.0.0",
-    "tslint-react": "^2.3.0",
+    "@types/react-dom": "^0.14.20",
+    "jest": "^19.0.2",
+    "simple-spy": "^2.1.0",
+    "ts-jest": "^19.0.0",
     "tslint": "^4.3.1",
+    "tslint-react": "^2.3.0",
     "typescript": "^2.1.5"
+  },
+  "jest": {
+    "transform": {
+      ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    },
+    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
+    "setupFiles": [
+      "<rootDir>/vendor.js"
+    ]
   }
 }

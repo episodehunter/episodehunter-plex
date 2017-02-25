@@ -4,20 +4,37 @@ import { ApplicationState } from '../types';
 import { requestNewIdToken } from './renew-eh-token';
 import { Unauthorized } from './errors/unauthorized';
 
-export function verifyPlex(host: string, port: number, token: string) {
+function retryOnServerError(delayTime: number) {
+    return (error$: Observable<Error>) => error$
+        .map(error => {
+            if (error instanceof Unauthorized) {
+                throw error;
+            }
+            return error;
+        })
+        .scan((errorCount, err) => {
+            if (errorCount >= 2) {
+                throw err;
+            }
+            return errorCount + 1;
+        }, 0)
+        .delay(delayTime);
+}
+
+
+export function verifyPlex(host: string, port: number, token: string, _ajax = ajax, delayTime = 1000) {
     const url = `http://${host}:${port}/status/sessions`;
     const header = { Accept: 'application/json', 'X-Plex-Token': token };
-    return ajax.get(url, header)
+    return _ajax.get(url, header)
         .map(response => response.status)
-        .map(status => {
+        .catch(response => {
+            const status = response.status;
             if (status === 401) {
                 throw new Unauthorized();
-            } else if (status < 200 || status > 299) {
-                throw new Error();
             }
-            return status;
+            throw new Error();
         })
-        .retry(2);
+        .retryWhen(retryOnServerError(delayTime));
 }
 
 const isCredentialsCollected = (state: Partial<ApplicationState>) => [
