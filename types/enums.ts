@@ -3,3 +3,9 @@ export enum ViewType {
   plex,
   plexserver
 };
+
+export enum StatusType {
+  Ok,
+  Warning,
+  Error
+};
