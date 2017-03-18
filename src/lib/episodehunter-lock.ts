@@ -6,13 +6,19 @@ export function createEpisodehunterLock(cb) {
     'episodehunter.auth0.com',
     {
       autoclose: true,
+      autofocus: true,
+      theme: {
+        logo: 'logo.png',
+        primaryColor: '#03a37e'
+      },
       auth: {
         params: {
           scope: 'openid email user_id'
         },
         redirect: false,
         sso: false
-      }
+      },
+      allowSignUp: false
     }
   );
 
