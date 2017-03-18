@@ -1,41 +1,43 @@
 import 'rxjs/add/observable/throw';
 import { Observable } from 'rxjs/Observable';
+import { createRxTestScheduler } from 'marble-test';
 import { spy } from 'simple-spy';
 import { Unauthorized } from '../errors/unauthorized';
 import { verifyPlex } from '../verify';
 
-test('Return Unauthorized error for status code 401', () => {
-  expect.assertions(1);
-  const ajax = { get: () => Observable.throw({ status: 401 }) };
+const rethrowError$ = e$ => e$.map(e => { throw e; });
 
-  verifyPlex('', 80, '', ajax as any)
-    .subscribe(
-      () => ({}),
-      error => expect(error instanceof Unauthorized).toBe(true)
-    );
+test('Return Unauthorized error for status code 401', () => {
+  const scheduler = createRxTestScheduler();
+  const error = { status: 401 };
+  const ajax = { get: () => scheduler.createColdObservable('#', {}, error) };
+
+  const obs = verifyPlex('', 80, '', ajax as any, rethrowError$);
+
+  scheduler.expectObservable(obs).toBe('#', null, new Unauthorized());
+  scheduler.flush();
 });
 
-test('Return an generic error for status code 500', done => {
-  const ajax = { get: () => Observable.throw({ status: 500 }) };
+test('Return an generic error for status code 500', () => {
+  const scheduler = createRxTestScheduler();
+  const error = { status: 500 };
+  const ajax = { get: () => scheduler.createColdObservable('#', null, error) };
 
-  verifyPlex('', 80, '', ajax as any, 0)
-    .subscribe(
-      () => console.log('NEXT!'),
-      error => {
-        expect(error instanceof Error).toBe(true);
-        done();
-      }
-    );
+  const obs = verifyPlex('', 80, '', ajax as any, rethrowError$);
+
+  scheduler.expectObservable(obs).toBe('#', null, new Error());
+  scheduler.flush();
 });
 
 test('Return the status code for OK', () => {
-  expect.assertions(1);
-  const ajax = { get: () => Observable.of({ status: 200 }) };
+  const scheduler = createRxTestScheduler();
+  const response = { status: 200 };
+  const ajax = { get: () => scheduler.createColdObservable('--a|', { a: response }) };
 
-  verifyPlex('', 80, '', ajax as any)
-    .subscribe(
-      next => expect(next).toBe(200)
-    );
+  const obs = verifyPlex('', 80, '', ajax as any, rethrowError$);
+
+  scheduler.expectObservable(obs).toBe('--a|', { a: 200 });
+  scheduler.flush();
 });
 
 test('Should call the plex server when a token', () => {

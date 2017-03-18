@@ -17,7 +17,6 @@ export function createEpisodehunterLock(cb) {
   );
 
   lock.on('authenticated', authResult => {
-    console.log(authResult);
     cb(authResult.idToken);
   });
   return () => lock.show();

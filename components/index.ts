@@ -1,4 +1,4 @@
-export { LoginRow, StatusType } from './LoginRow';
+export { LoginRow } from './LoginRow';
 export { Overlay } from './Overlay';
 export { PlexLogin } from './PlexLogin';
 export { PlexServerCredentials } from './PlexServerCredentials';

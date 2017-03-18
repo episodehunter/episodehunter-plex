@@ -24,21 +24,22 @@ function defaultModel(): ApplicationState {
 }
 
 const config = {
-    get() {
-        const state = electronConfig.get(configKey);
-        if (!state) {
-            const newState = defaultModel();
-            electronConfig.set(configKey, newState);
-            return newState;
-        } else {
-            console.log('Loading old state :)');
-            return state;
-        }
-    },
-    set(state: ApplicationState) {
-        console.log('Saving the next sate', state);
-        return electronConfig.set(configKey, state);
+  get() {
+    const state = electronConfig.get(configKey);
+    if (!state) {
+      const newState = defaultModel();
+      electronConfig.set(configKey, newState);
+      return newState;
+    } else {
+      console.log('Loading old state :)');
+      state.episodehunter.token = 'HejHej';
+      return state;
     }
+  },
+  set(state: ApplicationState) {
+    console.log('Saving the next sate', state);
+    return electronConfig.set(configKey, state);
+  }
 };
 
 export { config };

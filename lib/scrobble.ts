@@ -66,8 +66,6 @@ export const watching$ = (credentials: Credentials) => {
     .retryWhen(error$ => error$.delay(5000))
     .do(() => console.log('filter hasStoptPlayingEvent'))
     .filter(hasStoptPlayingEvent)
-    .do(() => console.log('map getSessionKey'))
-    // .map(getSessionKey)
     .do(() => console.log('concatMap mediaMetadata$'))
     .concatMap((plexEvent: PlexEvent) => {
       return mediaMetadata$(credentials)(getSessionKey(plexEvent)).map(show => Object.assign(show, { viewOffset: viewOffset(plexEvent) }));

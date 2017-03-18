@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { Subscription } from 'rxjs/Subscription';
 import { Subject } from 'rxjs/Subject';
-import { LoginRow, StatusType, PlexLogin, SyncStatus, PlexServerCredentials } from '../components';
+import { LoginRow, PlexLogin, SyncStatus, PlexServerCredentials } from '../components';
 import { createEpisodehunterLock, config, renewEhToken, satisfiedCredentials$, watching$, checkCredentials$ } from '../lib';
-import { ApplicationState, ViewType } from '../types';
+import { ApplicationState, ViewType, StatusType } from '../types';
 
 export default class App extends React.Component<void, Partial<ApplicationState>> {
   showEpisodehunterLock;
@@ -30,6 +30,7 @@ export default class App extends React.Component<void, Partial<ApplicationState>
       ),
 
       this.credentialsChange$
+        .debounceTime(10)
         .let(satisfiedCredentials$())
         .switchMap(watching$)
         .retry()
@@ -57,6 +58,10 @@ export default class App extends React.Component<void, Partial<ApplicationState>
     this.subscriptions
       .filter(s => s && s.unsubscribe)
       .forEach(s => s.unsubscribe());
+  }
+
+  setState(args) {
+    super.setState(args);
   }
 
   changeView = (nextView: ViewType) => this.setState({'currentView': nextView});
