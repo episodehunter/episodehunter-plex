@@ -11,6 +11,11 @@ function shallowObjectCompare(a, b) {
   return Object.keys(a).every(key => a[key] === b[key]);
 }
 
+function sameShow(a: Show, b: Show) {
+  const keys: (keyof Show)[] = ['theTvDbId', 'season', 'episode']
+  return keys.every(key => a[key] === b[key]);
+}
+
 function createPlexServerUrl(credentials: Credentials) {
   const { plexToken, host, port } = credentials;
   return `ws://${host}:${port}/:/websockets/notifications?X-Plex-Token=${plexToken}`;
@@ -72,7 +77,8 @@ export const watching$ = (credentials: Credentials) => {
     })
     .do(show => console.log('filter watched', show))
     .filter(show => show.viewOffset / show.duration > .7)
-    .do(() => console.log('concatMap scrobbleToEpisodehunter$'))
+    .do(() => console.log('Will scroble if new snow'))
+    .distinctUntilChanged(sameShow)
     .concatMap(show => {
       return scrobbleToEpisodehunter$(credentials)(show);
     });
