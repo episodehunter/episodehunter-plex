@@ -29,11 +29,11 @@ test('Return an generic error for status code 500', () => {
 
 test('Return the response for OK', () => {
   const scheduler = createRxTestScheduler();
-  const response = { response: { token: 'Yoo' } };
+  const response = { response: { id_token: 'Yoo' } };
   const ajaxPost = () => scheduler.createColdObservable('--a|', { a: response });
 
   const obs = requestNewIdToken('', ajaxPost as any, rethrowError$);
 
-  scheduler.expectObservable(obs).toBe('--a|', { a: response.response });
+  scheduler.expectObservable(obs).toBe('--a|', { a: response.response.id_token });
   scheduler.flush();
 });
