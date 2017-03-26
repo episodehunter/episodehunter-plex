@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`that Overlay renders 1`] = `
+<div
+  style={
+    Object {
+      "backgroundColor": "rgba(0, 0, 0, 0.8)",
+      "height": "100%",
+      "left": 0,
+      "position": "absolute",
+      "top": 0,
+      "width": "100%",
+      "zIndex": 100,
+    }
+  }
+/>
+`;

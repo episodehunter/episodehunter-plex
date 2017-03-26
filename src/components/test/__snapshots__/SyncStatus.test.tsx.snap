@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`that SyncStatus renders 1`] = `
+<h1>
+  Ready to sync
+</h1>
+`;

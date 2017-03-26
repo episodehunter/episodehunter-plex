@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`that StatusIcon renders 1`] = `
+<div
+  style={
+    Object {
+      "alignSelf": "center",
+      "backgroundColor": "green",
+      "borderRadius": "10px",
+      "height": "20px",
+      "marginRight": "10px",
+      "width": "20px",
+    }
+  }
+/>
+`;

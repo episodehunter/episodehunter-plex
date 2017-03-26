@@ -1,0 +1,65 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`that PlexLogin renders 1`] = `
+<div
+  style={
+    Object {
+      "width": "100%",
+    }
+  }
+>
+  <div
+    className="from-row"
+  >
+    <label>
+      Plex username:
+    </label>
+    <input
+      onChange={[Function]}
+      type="text"
+      value=""
+    />
+  </div>
+  <div
+    className="from-row"
+  >
+    <label>
+      Plex password:
+    </label>
+    <input
+      onChange={[Function]}
+      type="password"
+      value=""
+    />
+  </div>
+  <div
+    style={
+      Object {
+        "color": "red",
+      }
+    }
+  >
+    
+  </div>
+  <div
+    style={
+      Object {
+        "display": "flex",
+        "justifyContent": "space-between",
+      }
+    }
+  >
+    <button
+      onClick={[Function]}
+    >
+      Request token
+    </button>
+    <button
+      className="cancel"
+      onClick={[Function]}
+    >
+      Cancel
+    </button>
+  </div>
+</div>
+`;
