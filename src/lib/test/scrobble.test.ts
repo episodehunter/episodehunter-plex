@@ -1,5 +1,31 @@
 import { createRxTestScheduler } from 'marble-test';
-import { satisfiedCredentials$ } from '../scrobble';
+import { satisfiedCredentials$, watchingEpisode } from '../scrobble';
+
+test('watchingEpisode should return true for episodes', () => {
+  const metadata = {
+    MediaContainer: {
+      Metadata: [{
+        type: 'episode'
+      }]
+    }
+  };
+  const result = watchingEpisode(metadata as any);
+
+  expect(result).toBe(true);
+});
+
+test('watchingEpisode should return false for movies', () => {
+  const metadata = {
+    MediaContainer: {
+      Metadata: [{
+        type: 'movie'
+      }]
+    }
+  };
+  const result = watchingEpisode(metadata as any);
+
+  expect(result).toBe(false);
+});
 
 test('satisfiedCredentials should not pass through the same object', () => {
   // Arrange

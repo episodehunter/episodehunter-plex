@@ -3,6 +3,10 @@ import { webSocket } from 'rxjs/observable/dom/webSocket';
 import { ajax } from 'rxjs/observable/dom/ajax';
 import { Credentials, PlexEvent, PlexMetadata, Show } from '../types';
 
+export function watchingEpisode(metadata: PlexMetadata) {
+  return metadata.MediaContainer.Metadata[0].type === 'episode';
+}
+
 function satisfiedCredentials(credentials: Credentials) {
   return Object.keys(credentials).every(key => credentials[key]);
 }
@@ -52,7 +56,7 @@ const mediaMetadata$ = (credentials: Credentials) => {
   const url = `http://${host}:${port}`;
   const header = { Accept: 'application/json', 'X-Plex-Token': plexToken };
   return (sessionKey: string) => {
-    return ajax.get(url + sessionKey, header).map(response => response.response).map(mapMetadataToShow);
+    return ajax.get(url + sessionKey, header).map(response => response.response);
   };
 };
 
@@ -70,8 +74,12 @@ export const watching$ = (credentials: Credentials) => {
   return webSocket(createPlexServerUrl(credentials))
     .retryWhen(error$ => error$.delay(5000))
     .filter(hasStoptPlayingEvent)
-    .concatMap((plexEvent: PlexEvent) => {
-      return mediaMetadata$(credentials)(getSessionKey(plexEvent)).map(show => Object.assign(show, { viewOffset: viewOffset(plexEvent) }));
+    .debounceTime(1000)
+    .switchMap((plexEvent: PlexEvent) => {
+      return mediaMetadata$(credentials)(getSessionKey(plexEvent))
+        .filter(watchingEpisode)
+        .map(mapMetadataToShow)
+        .map(show => Object.assign(show, { viewOffset: viewOffset(plexEvent) }));
     })
     .filter(show => show.viewOffset / show.duration > .7)
     .distinctUntilChanged(sameShow)
