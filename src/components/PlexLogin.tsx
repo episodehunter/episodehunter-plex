@@ -55,7 +55,7 @@ export class PlexLogin extends React.Component<PlexLoginProps, PlexLoginState> {
 
   render() {
     return (
-      <div>
+      <div style={{width: '100%'}}>
         {this.state.loading && <Overlay />}
         <div className='from-row'>
           <label>Plex username:</label>
@@ -68,8 +68,10 @@ export class PlexLogin extends React.Component<PlexLoginProps, PlexLoginState> {
         <div style={{color: 'red'}}>
          {this.state.errorMsg}
         </div>
-        <button onClick={() => this.loginClick$.next()}>Request token</button>
-        <p onClick={this.props.onCancel}>Cancel</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <button onClick={() => this.loginClick$.next()}>Request token</button>
+          <button className="cancel" onClick={this.props.onCancel}>Cancel</button>
+        </div>
       </div>
     );
   }

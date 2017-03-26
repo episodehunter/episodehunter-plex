@@ -58,7 +58,7 @@ export class PlexServerCredentials extends React.Component<PlexServerCredentials
 
   render() {
     return (
-      <div>
+      <div style={{width: '100%'}}>
         {this.state.loading && <Overlay />}
         <div className='from-row'>
           <label>Plex hostname or ip:</label>
@@ -71,8 +71,10 @@ export class PlexServerCredentials extends React.Component<PlexServerCredentials
         <div>
          {this.state.errorMsg}
         </div>
-        <button onClick={() => this.checkClick$.next()}>Check connection</button>
-        <p onClick={this.props.onCancel}>Cancel</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <button onClick={() => this.checkClick$.next()}>Test connection</button>
+          <button className="cancel" onClick={this.props.onCancel}>Cancel</button>
+        </div>
       </div>
     );
   }
