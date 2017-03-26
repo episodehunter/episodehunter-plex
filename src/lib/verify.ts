@@ -1,11 +1,11 @@
 import { Observable } from 'rxjs/Observable';
 import { ajax } from 'rxjs/observable/dom/ajax';
-import { ApplicationState } from '../types';
+import { Credentials } from '../types';
 import { requestNewIdToken } from './renew-eh-token';
 import { retryOnServerError } from './util';
 import { Unauthorized } from './errors/unauthorized';
 
-export function verifyPlex(host: string, port: number, token: string, _ajax = ajax, retry = retryOnServerError(Unauthorized, 1000)) {
+export function verifyPlex$(host: string, port: number, token: string, _ajax = ajax, retry = retryOnServerError(Unauthorized, 1000)) {
   const url = `http://${host}:${port}/status/sessions`;
   const header = { Accept: 'application/json', 'X-Plex-Token': token };
   return _ajax.get(url, header)
@@ -20,24 +20,16 @@ export function verifyPlex(host: string, port: number, token: string, _ajax = aj
     .retryWhen(retry);
 }
 
-const isCredentialsCollected = (state: Partial<ApplicationState>) => [
-  state.plex.token,
-  state.episodehunter.token,
-  state.plexServer.connection
-].some(key => !!key);
+const objectValues = obj => Object.keys(obj).map(key => obj[key]);
+
+export const isCredentialsCollected = (credentials: Credentials) => objectValues(credentials).every(value => value);
 
 export function checkCredentials$(
-  state: Partial<ApplicationState>,
   setPlexCredentials: (username: string, token: string) => void,
   setEpisodehunterToken: (token: string) => void,
   setErrorMessage: (error: string) => void
-) {
-  if (!isCredentialsCollected(state)) {
-    setErrorMessage('Please complete all steps above');
-    return Observable.of(false);
-  }
-
-  const plex$ = verifyPlex(state.plexServer.host, state.plexServer.port, state.plex.token)
+): (credentials: Credentials) => Observable<Credentials | null> {
+  const plex$ = (host, port, token) => verifyPlex$(host, port, token)
     .map(() => true)
     .catch(error => {
       if (error instanceof Unauthorized) {
@@ -50,11 +42,8 @@ export function checkCredentials$(
       return Observable.of(false);
     });
 
-  const eh$ = requestNewIdToken(state.episodehunter.token)
-    .map(token => {
-      setEpisodehunterToken(token);
-      return true;
-    })
+  const eh$ = oldtoken => requestNewIdToken(oldtoken)
+    .map(token => true)
     .catch(error => {
       setEpisodehunterToken(null);
       if (error instanceof Unauthorized) {
@@ -65,12 +54,24 @@ export function checkCredentials$(
       return Observable.of(false);
     });
 
-  return Observable
-    .concat(plex$, eh$)
-    .every(val => val)
-    .do(val => {
-      if (val) {
-        setErrorMessage(null);
-      }
-    });
+  return (credentials: Credentials) => {
+    if (!isCredentialsCollected(credentials)) {
+      setErrorMessage('Please complete all steps above');
+      return Observable.of(null);
+    }
+    return Observable
+      .concat(
+        plex$(credentials.host, credentials.port, credentials.plexToken),
+        eh$(credentials.ehToken)
+      )
+      .every(valid => valid)
+      .do(valid => {
+        console.log('Is it valid?', valid);
+        if (valid) {
+          setErrorMessage(null);
+        }
+      })
+      .map(valid => valid ? credentials : null);
+  };
+
 }
