@@ -27,7 +27,7 @@
     "@types/jest": "^19.2.2",
     "@types/node": "^7.0.11",
     "@types/react": "^15.0.20",
-    "@types/react-dom": "^0.14.23",
+    "@types/react-dom": "0.14.20",
     "electron-packager": "^8.6.0",
     "jest": "^19.0.2",
     "marble-test": "^2.1.3",
