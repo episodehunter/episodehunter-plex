@@ -67,7 +67,7 @@ export class PlexServerCredentials extends React.Component<PlexServerCredentials
           <label>Port:</label>
           <input type="text" value={this.state.port} onChange={(e: any) => this.updatePort(e.target.value)} />
         </div>
-        <div>
+        <div style={{ color: 'red' }}>
          {this.state.errorMsg}
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
