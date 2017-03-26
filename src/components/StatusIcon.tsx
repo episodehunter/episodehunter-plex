@@ -8,7 +8,7 @@ const style = status => ({
   alignSelf: 'center',
   marginRight: '10px',
   backgroundColor: ['green', '#d2d200', 'red'][status]
-});
+} as any);
 
 export function StatusIcon({status}: {status: StatusType}) {
   return (

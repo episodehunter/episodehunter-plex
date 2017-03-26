@@ -15,9 +15,7 @@ export default class App extends React.Component<void, Partial<ApplicationState>
   constructor() {
     super();
     log.info('Starting episodehunter-plex!');
-    this.state = config.get();
-    this.state.loading = true;
-    this.state.currentView = ViewType.start;
+    this.state = Object.assign(config.get(), { loading: true, currentView: ViewType.start });
     this.showEpisodehunterLock = createEpisodehunterLock(token => this.setState({episodehunter: {token}}));
   }
 
