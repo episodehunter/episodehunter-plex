@@ -1,5 +1,6 @@
 import { Observable } from 'rxjs/Observable';
 import { ajax } from 'rxjs/observable/dom/ajax';
+import * as jwt from 'jsonwebtoken';
 import { retryOnServerError } from './util';
 import { Unauthorized } from './errors/unauthorized';
 
@@ -13,7 +14,7 @@ export function requestNewIdToken(idToken: string, post = ajax.post, retry = ret
     scope: 'openid'
   };
   return post(url, body, header)
-    .map(response => response.response)
+    .map(response => response.response.id_token)
     .catch(response => {
       const status = response.status;
       if (status === 401) {
@@ -22,6 +23,11 @@ export function requestNewIdToken(idToken: string, post = ajax.post, retry = ret
       throw new Error();
     })
     .retryWhen(retry);
+}
+
+export function ehTokenExpired(token: string) {
+  const decoded = jwt.decode(token);
+  return !decoded || decoded.exp < (Date.now() / 1000);
 }
 
 export function renewEhToken(idToken: () => string): Observable<string> {

@@ -16,8 +16,10 @@
   "dependencies": {
     "electron": "^1.4.13",
     "electron-config": "^0.2.1",
+    "electron-log": "^2.0.0",
     "electron-packager": "^8.5.0",
     "electron-reload": "^1.1.0",
+    "jsonwebtoken": "^7.3.0",
     "menubar": "^5.2.0",
     "react": "^15.4.2",
     "react-dom": "^15.4.2",

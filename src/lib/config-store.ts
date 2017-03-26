@@ -6,6 +6,7 @@ const configKey = 'state';
 
 function defaultModel(): ApplicationState {
   return {
+    loading: false,
     plex: {
       username: '',
       token: ''
@@ -31,13 +32,10 @@ const config = {
       electronConfig.set(configKey, newState);
       return newState;
     } else {
-      console.log('Loading old state :)');
-      state.episodehunter.token = 'HejHej';
       return state;
     }
   },
   set(state: ApplicationState) {
-    console.log('Saving the next sate', state);
     return electronConfig.set(configKey, state);
   }
 };

@@ -1,9 +1,11 @@
-var menubar = require('menubar');
-require('electron-reload')(__dirname);
+const { join } = require('path');
+const menubar = require('menubar');
+const { app } = require('electron');
 
-var mb = menubar({
+const mb = menubar({
   width: 300,
-  height: 500
+  height: 500,
+  dir: join(process.cwd(), 'dist')
 });
 
 mb.on('ready', function ready () {

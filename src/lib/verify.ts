@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs/Observable';
 import { ajax } from 'rxjs/observable/dom/ajax';
 import { Credentials } from '../types';
-import { requestNewIdToken } from './renew-eh-token';
+import { ehTokenExpired } from './renew-eh-token';
 import { retryOnServerError } from './util';
 import { Unauthorized } from './errors/unauthorized';
 
@@ -42,17 +42,14 @@ export function checkCredentials$(
       return Observable.of(false);
     });
 
-  const eh$ = oldtoken => requestNewIdToken(oldtoken)
-    .map(token => true)
-    .catch(error => {
+  const eh$ = token => {
+    if (ehTokenExpired(token)) {
       setEpisodehunterToken(null);
-      if (error instanceof Unauthorized) {
-        setErrorMessage('Could not verify your episodehunter credentials, please try to update your username and password');
-      } else {
-        setErrorMessage('Could not verify your episodehunter credentials, please try again later');
-      }
+      setErrorMessage('Could not verify your episodehunter credentials, please login again');
       return Observable.of(false);
-    });
+    }
+    return Observable.of(true);
+  };
 
   return (credentials: Credentials) => {
     if (!isCredentialsCollected(credentials)) {
@@ -64,9 +61,8 @@ export function checkCredentials$(
         plex$(credentials.host, credentials.port, credentials.plexToken),
         eh$(credentials.ehToken)
       )
-      .every(valid => valid)
+      .every(valid => valid === true)
       .do(valid => {
-        console.log('Is it valid?', valid);
         if (valid) {
           setErrorMessage(null);
         }

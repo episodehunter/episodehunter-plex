@@ -29,7 +29,6 @@ export class PlexServerCredentials extends React.Component<PlexServerCredentials
           .get(url, {Accept: 'application/json', 'X-Plex-Token': this.props.plexToken})
           .do(response => this.props.onSucess(this.state.host, this.state.port))
           .catch(reason => {
-            console.log(reason);
             this.setState({
               loading: false,
               errorMsg: 'Something went wrong'

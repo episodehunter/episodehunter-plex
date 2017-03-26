@@ -34,7 +34,6 @@ export class PlexLogin extends React.Component<PlexLoginProps, PlexLoginState> {
           )
           .do(response => this.props.onSucess(this.state.username, response.response.user.authToken))
           .catch(reason => {
-            console.log(reason);
             this.setState({
               loading: false,
               errorMsg: 'Something went wrong'

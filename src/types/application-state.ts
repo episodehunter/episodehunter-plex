@@ -1,6 +1,7 @@
 import { ViewType } from './enums';
 
 export interface ApplicationState {
+  loading: boolean;
   plex: {
     username: string;
     token: string;

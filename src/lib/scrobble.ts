@@ -12,7 +12,7 @@ function shallowObjectCompare(a, b) {
 }
 
 function sameShow(a: Show, b: Show) {
-  const keys: (keyof Show)[] = ['theTvDbId', 'season', 'episode']
+  const keys: (keyof Show)[] = ['theTvDbId', 'season', 'episode'];
   return keys.every(key => a[key] === b[key]);
 }
 
@@ -69,15 +69,11 @@ const scrobbleToEpisodehunter$ = (credentials: Credentials) => {
 export const watching$ = (credentials: Credentials) => {
   return webSocket(createPlexServerUrl(credentials))
     .retryWhen(error$ => error$.delay(5000))
-    .do(() => console.log('filter hasStoptPlayingEvent'))
     .filter(hasStoptPlayingEvent)
-    .do(() => console.log('concatMap mediaMetadata$'))
     .concatMap((plexEvent: PlexEvent) => {
       return mediaMetadata$(credentials)(getSessionKey(plexEvent)).map(show => Object.assign(show, { viewOffset: viewOffset(plexEvent) }));
     })
-    .do(show => console.log('filter watched', show))
     .filter(show => show.viewOffset / show.duration > .7)
-    .do(() => console.log('Will scroble if new snow'))
     .distinctUntilChanged(sameShow)
     .concatMap(show => {
       return scrobbleToEpisodehunter$(credentials)(show);
@@ -87,9 +83,7 @@ export const watching$ = (credentials: Credentials) => {
 export function satisfiedCredentials$() {
   return (credentials$: Observable<Credentials>) => {
     return credentials$
-      .do(() => console.log('filter satisfiedCredentials'))
       .filter(satisfiedCredentials)
-      .do(() => console.log('distinctUntilChanged shallowObjectCompare'))
       .distinctUntilChanged(shallowObjectCompare);
   };
 }

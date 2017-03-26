@@ -1,8 +1,10 @@
 import * as React from 'react';
+import * as log from 'electron-log';
 import { Subscription } from 'rxjs/Subscription';
+import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
-import { LoginRow, PlexLogin, SyncStatus, PlexServerCredentials } from '../components';
-import { createEpisodehunterLock, config, renewEhToken, satisfiedCredentials$, watching$, checkCredentials$ } from '../lib';
+import { LoginRow, PlexLogin, SyncStatus, PlexServerCredentials, Overlay } from '../components';
+import { createEpisodehunterLock, config, renewEhToken, requestNewIdToken as requestNewEhToken, satisfiedCredentials$, watching$, checkCredentials$ } from '../lib';
 import { ApplicationState, ViewType, StatusType } from '../types';
 
 export default class App extends React.Component<void, Partial<ApplicationState>> {
@@ -12,36 +14,55 @@ export default class App extends React.Component<void, Partial<ApplicationState>
 
   constructor() {
     super();
+    log.info('Starting episodehunter-plex!');
     this.state = config.get();
+    this.state.loading = true;
+    this.state.currentView = ViewType.start;
     this.showEpisodehunterLock = createEpisodehunterLock(token => this.setState({episodehunter: {token}}));
   }
 
   componentWillMount() {
     this.subscriptions.push(
-      checkCredentials$(
-        this.state,
-        this.setPlexCredentials,
-        this.setEpisodehunterToken,
-        this.setErrorMessage
-      )
-      .subscribe(
-        isCredentialsOk => console.log('Credentials result on boot: ', isCredentialsOk),
-        error => console.error('Error on credentials check on boot: ', error)
-      ),
-
       this.credentialsChange$
         .debounceTime(10)
         .let(satisfiedCredentials$())
-        .switchMap(watching$)
+        .switchMap(checkCredentials$(
+          this.setPlexCredentials,
+          this.setEpisodehunterToken,
+          this.setErrorMessage
+        ))
+        .switchMap(credentials => {
+          if (credentials === null) {
+            return Observable.never();
+          } else {
+            return watching$(credentials);
+          }
+        })
+        .catch(error => {
+          log.error(error);
+          throw error;
+        })
         .retry()
         .subscribe(
-          next => console.log('Scrobble: ', next),
-          error => console.error('Scrobble error: ', error),
-          () => console.log('Scrobble is DONE AND DONE!')
+          show => log.info('Scrobble: ', show),
+          error => log.error('Scrobble error: ', error),
+          () => log.error('Scrobble is done and done')
         ),
-
-      renewEhToken(() => this.state.episodehunter.token).subscribe()
+      renewEhToken(() => this.state.episodehunter.token).subscribe(this.setEpisodehunterToken)
     );
+
+    if (this.state.episodehunter.token) {
+      requestNewEhToken(this.state.episodehunter.token, undefined, e$ => e$.map(e => { throw e; }))
+        .catch(() => Observable.of(null))
+        .subscribe(
+          token => {
+            this.setEpisodehunterToken(token);
+            this.setState({loading: false});
+          }
+        );
+    } else {
+      this.setState({loading: false});
+    }
   }
 
   componentWillUpdate(nextProps, nextState) {
@@ -58,10 +79,6 @@ export default class App extends React.Component<void, Partial<ApplicationState>
     this.subscriptions
       .filter(s => s && s.unsubscribe)
       .forEach(s => s.unsubscribe());
-  }
-
-  setState(args) {
-    super.setState(args);
   }
 
   changeView = (nextView: ViewType) => this.setState({'currentView': nextView});
@@ -92,6 +109,7 @@ export default class App extends React.Component<void, Partial<ApplicationState>
 
     return (
       <div style={{display: 'flex', flexFlow: 'column'}}>
+        {this.state.loading && <Overlay />}
         <LoginRow status={episodehunterStatus} buttonText='Login to Episodehunter' onButtonClick={this.showEpisodehunterLock} />
         <LoginRow status={plexStatus} buttonText='Login to Plex' onButtonClick={() => this.changeView(ViewType.plex)} />
         <LoginRow status={plexServerStatus} buttonText='Connect to Plex' onButtonClick={() => this.changeView(ViewType.plexserver)} />
