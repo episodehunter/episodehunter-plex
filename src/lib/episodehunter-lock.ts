@@ -18,7 +18,10 @@ export function createEpisodehunterLock(cb) {
         redirect: false,
         sso: false
       },
-      allowSignUp: false
+      allowSignUp: false,
+      languageDictionary: {
+        title: 'Episodehunter'
+      }
     }
   );
 
