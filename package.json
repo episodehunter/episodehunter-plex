@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --watch",
-    "start": "tsc && cp logo.png index.html dist && electron ."
+    "start": "tsc && cp app-bridge.js logo.png index.html dist && electron ."
   },
   "keywords": [
     "plex",
