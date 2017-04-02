@@ -60,6 +60,11 @@ const mediaMetadata$ = (credentials: Credentials) => {
   };
 };
 
+const plexEvents$ = (credentials: Credentials) => {
+  return webSocket(createPlexServerUrl(credentials))
+    .retryWhen(error$ => error$.delay(5000));
+}
+
 const scrobbleToEpisodehunter$ = (credentials: Credentials) => {
   // const { ehToken } = credentials;
   // const url = `https://episodehunter.tv/shomething`;
@@ -70,22 +75,21 @@ const scrobbleToEpisodehunter$ = (credentials: Credentials) => {
   };
 };
 
-export const watching$ = (credentials: Credentials) => {
-  return webSocket(createPlexServerUrl(credentials))
-    .retryWhen(error$ => error$.delay(5000))
+const hasWatchedShow = (show: Show) => show.viewOffset / show.duration > .7;
+
+export const watching$ = (credentials: Credentials, event$ = plexEvents$, metadata$ = mediaMetadata$, scrobble$ = scrobbleToEpisodehunter$) => {
+  return event$(credentials)
     .filter(hasStoptPlayingEvent)
     .debounceTime(1000)
     .switchMap((plexEvent: PlexEvent) => {
-      return mediaMetadata$(credentials)(getSessionKey(plexEvent))
+      return metadata$(credentials)(getSessionKey(plexEvent))
         .filter(watchingEpisode)
         .map(mapMetadataToShow)
         .map(show => Object.assign(show, { viewOffset: viewOffset(plexEvent) }));
     })
-    .filter(show => show.viewOffset / show.duration > .7)
+    .filter(hasWatchedShow)
     .distinctUntilChanged(sameShow)
-    .concatMap(show => {
-      return scrobbleToEpisodehunter$(credentials)(show);
-    });
+    .concatMap(scrobble$(credentials));
 };
 
 export function satisfiedCredentials$() {
