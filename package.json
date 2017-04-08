@@ -14,7 +14,7 @@
   "author": "Oskar Karlsson <kontakta@oskarkarlsson.nu>",
   "license": "MIT",
   "dependencies": {
-    "electron": "^1.6.2",
+    "electron": "^1.6.4",
     "electron-config": "^0.2.1",
     "electron-log": "^2.0.0",
     "jsonwebtoken": "^7.3.0",
@@ -28,6 +28,7 @@
     "@types/node": "^7.0.11",
     "@types/react": "^15.0.20",
     "@types/react-dom": "0.14.20",
+    "electron-builder": "^16.6.1",
     "electron-packager": "^8.6.0",
     "jest": "^19.0.2",
     "marble-test": "^2.2.0",
@@ -52,5 +53,8 @@
       "<rootDir>/vendor.js"
     ],
     "testEnvironment": "node"
+  },
+  "build": {
+    "appId": "tv.episodehunter.plex"
   }
 }
