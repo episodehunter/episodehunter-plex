@@ -1,5 +1,4 @@
 import { createRxTestScheduler } from 'marble-test';
-import { Observable } from 'rxjs/Observable';
 import { satisfiedCredentials$, watchingEpisode, watching$ } from '../scrobble';
 
 test('watchingEpisode should return true for episodes', () => {
@@ -70,9 +69,8 @@ test('satisfiedCredentials should pass through a new object', () => {
   scheduler.flush();
 });
 
-test.only('scrobble after start and stop event', () => {
+test('scrobble after start and stop event', () => {
   // Arrange
-  debugger;
   const scheduler = createRxTestScheduler();
   const startEvent = {
     NotificationContainer: {
