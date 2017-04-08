@@ -5,8 +5,8 @@ const { app } = require('electron');
 const mb = menubar({
   width: 300,
   height: 500,
-  dir: join(process.cwd(), 'dist'),
-  icon: join(process.cwd(), 'IconTemplate.png')
+  dir: join(__dirname, 'dist'),
+  icon: join(__dirname, 'IconTemplate.png')
 });
 
 mb.on('ready', function ready () {
