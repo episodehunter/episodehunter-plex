@@ -1,7 +1,11 @@
 import { Observable } from 'rxjs/Observable';
 import { webSocket } from 'rxjs/observable/dom/webSocket';
 import { ajax } from 'rxjs/observable/dom/ajax';
+const log = require('electron').remote.require('electron-log');
 import { Credentials, PlexEvent, PlexMetadata, Show } from '../types';
+
+log.transports.console.level = 'info';
+log.transports.file.level = 'info';
 
 export function watchingEpisode(metadata: PlexMetadata) {
   return metadata.MediaContainer.Metadata[0].type === 'episode';
@@ -79,16 +83,22 @@ const hasWatchedShow = (show: Show) => show.viewOffset / show.duration > .7;
 
 export const watching$ = (credentials: Credentials, event$ = plexEvents$, metadata$ = mediaMetadata$, scrobble$ = scrobbleToEpisodehunter$) => {
   return event$(credentials)
+    .do(() => log.info('Has the user stopt playing?'))
     .filter(hasStoptPlayingEvent)
+    .do(() => log.info('Yepp, lets wait for a while'))
     .debounceTime(1000)
     .switchMap((plexEvent: PlexEvent) => {
+      log.info('Get meta data for the show');
       return metadata$(credentials)(getSessionKey(plexEvent))
         .filter(watchingEpisode)
         .map(mapMetadataToShow)
         .map(show => Object.assign(show, { viewOffset: viewOffset(plexEvent) }));
     })
+    .do(() => log.info('Check if the user has watched the show'))
     .filter(hasWatchedShow)
+    .do(() => log.info('Is it a new show?'))
     .distinctUntilChanged(sameShow)
+    .do(() => log.info('Mark it as waiched!'))
     .concatMap(scrobble$(credentials));
 };
 

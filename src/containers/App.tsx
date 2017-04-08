@@ -1,11 +1,14 @@
 import * as React from 'react';
-import * as log from 'electron-log';
+const log = require('electron').remote.require('electron-log');
 import { Subscription } from 'rxjs/Subscription';
 import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
 import { LoginRow, PlexLogin, SyncStatus, PlexServerCredentials, Overlay } from '../components';
 import { createEpisodehunterLock, config, renewEhToken, requestNewIdToken as requestNewEhToken, satisfiedCredentials$, watching$, checkCredentials$ } from '../lib';
 import { ApplicationState, ViewType, StatusType } from '../types';
+
+log.transports.console.level = 'info';
+log.transports.file.level = 'info';
 
 export default class App extends React.Component<void, Partial<ApplicationState>> {
   showEpisodehunterLock;
@@ -22,8 +25,11 @@ export default class App extends React.Component<void, Partial<ApplicationState>
   componentWillMount() {
     this.subscriptions.push(
       this.credentialsChange$
+        .do(() => log.info('The credentials has changed, lets wait'))
         .debounceTime(10)
+        .do(d => log.info('Check satisfiedCredentials$', JSON.stringify(d)))
         .let(satisfiedCredentials$())
+        .do(() => log.info('The credentails seems OK. Lets check them'))
         .switchMap(checkCredentials$(
           this.setPlexCredentials,
           this.setEpisodehunterToken,
@@ -31,8 +37,10 @@ export default class App extends React.Component<void, Partial<ApplicationState>
         ))
         .switchMap(credentials => {
           if (credentials === null) {
+            log.info('The credentials is not okey, bailout');
             return Observable.never();
           } else {
+            log.info('The credentials is okey, switch to watch mode');
             return watching$(credentials);
           }
         })
