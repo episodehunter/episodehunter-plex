@@ -3,6 +3,8 @@ import { webSocket } from 'rxjs/observable/dom/webSocket';
 import { ajax } from 'rxjs/observable/dom/ajax';
 const log = require('electron').remote.require('electron-log');
 import { Credentials, PlexEvent, PlexMetadata, Show } from '../types';
+import { retryOnServerError } from './util';
+import { Unauthorized } from './errors/unauthorized';
 
 log.transports.console.level = 'info';
 log.transports.file.level = 'info';
@@ -70,12 +72,19 @@ const plexEvents$ = (credentials: Credentials) => {
 }
 
 const scrobbleToEpisodehunter$ = (credentials: Credentials) => {
-  // const { ehToken } = credentials;
-  // const url = `https://episodehunter.tv/shomething`;
-  // const header = { Accept: 'application/json', 'yolo': ehToken };
+  const { ehToken } = credentials;
+  const url = `https://episodehunter-scrobble-ilrosnyqaq.now.sh/episode`;
+  const header = {
+    'Content-Type': 'application/json',
+    'Authorization': 'bearer ' + ehToken
+  };
   return (episode: Show) => {
-    return Observable.of(episode).do(() => console.log('Have now scrobbled!', episode));
-    // return ajax.post(url, episode, header);
+    const body = {
+      theTvDbId: Number(episode.theTvDbId),
+      season: Number(episode.season),
+      episode: Number(episode.episode)
+    };
+    return ajax.post(url, body, header).retryWhen(retryOnServerError(Unauthorized, 1000));
   };
 };
 
