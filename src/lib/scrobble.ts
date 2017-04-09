@@ -1,13 +1,8 @@
 import { Observable } from 'rxjs/Observable';
 import { webSocket } from 'rxjs/observable/dom/webSocket';
 import { ajax } from 'rxjs/observable/dom/ajax';
-const log = require('electron').remote.require('electron-log');
+import { post } from './http';
 import { Credentials, PlexEvent, PlexMetadata, Show } from '../types';
-import { retryOnServerError } from './util';
-import { Unauthorized } from './errors/unauthorized';
-
-log.transports.console.level = 'info';
-log.transports.file.level = 'info';
 
 export function watchingEpisode(metadata: PlexMetadata) {
   return metadata.MediaContainer.Metadata[0].type === 'episode';
@@ -71,7 +66,7 @@ const plexEvents$ = (credentials: Credentials) => {
     .retryWhen(error$ => error$.delay(5000));
 }
 
-const scrobbleToEpisodehunter$ = (credentials: Credentials) => {
+export const scrobbleToEpisodehunter$ = (credentials: Credentials, _post = post) => {
   const { ehToken } = credentials;
   const url = `https://episodehunter-scrobble-ilrosnyqaq.now.sh/episode`;
   const header = {
@@ -84,13 +79,13 @@ const scrobbleToEpisodehunter$ = (credentials: Credentials) => {
       season: Number(episode.season),
       episode: Number(episode.episode)
     };
-    return ajax.post(url, body, header).retryWhen(retryOnServerError(Unauthorized, 1000));
+    return _post(url, body, header);
   };
 };
 
 const hasWatchedShow = (show: Show) => show.viewOffset / show.duration > .7;
 
-export const watching$ = (credentials: Credentials, event$ = plexEvents$, metadata$ = mediaMetadata$, scrobble$ = scrobbleToEpisodehunter$) => {
+export const watching$ = (credentials: Credentials, log, event$ = plexEvents$, metadata$ = mediaMetadata$, scrobble$ = scrobbleToEpisodehunter$) => {
   return event$(credentials)
     .do(() => log.info('Has the user stopt playing?'))
     .filter(hasStoptPlayingEvent)

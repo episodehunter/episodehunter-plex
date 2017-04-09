@@ -2368,9 +2368,9 @@ map-obj@^1.0.0, map-obj@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/map-obj/-/map-obj-1.0.1.tgz#d933ceb9205d82bdcf4886f6742bdc2b4dea146d"
 
-marble-test@^2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/marble-test/-/marble-test-2.2.0.tgz#c1ebe826773903849400546eb3a0dbf667ae9aae"
+marble-test@^2.2.3:
+  version "2.2.3"
+  resolved "https://registry.yarnpkg.com/marble-test/-/marble-test-2.2.3.tgz#0d6134b3415dd58cc0d9dcb1e59d4c402856b233"
   dependencies:
     chalk "^1.1.3"
     easy-table "^1.0.0"

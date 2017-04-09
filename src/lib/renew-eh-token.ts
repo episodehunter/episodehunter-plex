@@ -1,10 +1,8 @@
 import { Observable } from 'rxjs/Observable';
-import { ajax } from 'rxjs/observable/dom/ajax';
 import * as jwt from 'jsonwebtoken';
-import { retryOnServerError } from './util';
-import { Unauthorized } from './errors/unauthorized';
+import { post } from './http';
 
-export function requestNewIdToken(idToken: string, post = ajax.post, retry = retryOnServerError(Unauthorized, 1000)): Observable<string> {
+export function requestNewIdToken(idToken: string, _post = post): Observable<string> {
   const url = `https://episodehunter.auth0.com/delegation`;
   const header = { 'Content-Type': 'application/json' };
   const body = {
@@ -13,16 +11,8 @@ export function requestNewIdToken(idToken: string, post = ajax.post, retry = ret
     id_token: idToken,
     scope: 'openid'
   };
-  return post(url, body, header)
-    .map(response => response.response.id_token)
-    .catch(response => {
-      const status = response.status;
-      if (status === 401) {
-        throw new Unauthorized();
-      }
-      throw new Error();
-    })
-    .retryWhen(retry);
+  return _post<any>(url, body, header)
+    .map(response => response.response.id_token);
 }
 
 export function ehTokenExpired(token: string) {

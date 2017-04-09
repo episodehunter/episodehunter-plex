@@ -1,5 +1,9 @@
 import { createRxTestScheduler } from 'marble-test';
-import { satisfiedCredentials$, watchingEpisode, watching$ } from '../scrobble';
+import { spy } from 'simple-spy';
+import { satisfiedCredentials$, watchingEpisode, watching$, scrobbleToEpisodehunter$ } from '../scrobble';
+import { Unauthorized } from '../errors/unauthorized';
+import { post } from '../http';
+import { retryOnServerError } from '../util';
 
 test('watchingEpisode should return true for episodes', () => {
   const metadata = {
@@ -123,11 +127,85 @@ test('scrobble after start and stop event', () => {
   const events$ = () => scheduler.createColdObservable('a--a-b|', eventValues);
   const expected = '------1|';
   const showValues = {1: viking};
+  const logger = { info: () => {} };
 
   // Act
-  const obs = watching$(credentials, events$ as any, metadata$, scrobble$);
+  const obs = watching$(credentials, logger, events$ as any, metadata$, scrobble$);
 
   // Assert
   scheduler.expectObservable(obs).toBe(expected, showValues);
+  scheduler.flush();
+});
+
+test('scrobbleToEpisodehunter$ should emit values when it goes well', () => {
+  const scheduler = createRxTestScheduler();
+  const ehToken = 'hej';
+  const credentials = { ehToken };
+  const episode = {
+    playState: 'stopped'
+  };
+  const posting$ = scheduler.createColdObservable('---x|', {x: 5});
+  const postMock = spy(() => posting$);
+
+  // Act
+  const obs = scrobbleToEpisodehunter$(credentials as any, postMock as any)(episode as any);
+  scheduler.expectObservable(obs).toBe('---a|', {a: 5});
+  scheduler.flush();
+});
+
+test('scrobbleToEpisodehunter$ should not retry if emitting an Unauthorized error', () => {
+  const scheduler = createRxTestScheduler();
+  const ehToken = 'hej';
+  const credentials = { ehToken };
+  const error = { status: 401 };
+  const episode = {
+    playState: 'stopped'
+  };
+  const posting$ = scheduler.createColdObservable('---#', undefined, error);
+  const postMock = spy(() => post('', {}, {}, undefined, () => posting$));
+
+  // Act
+  const obs = scrobbleToEpisodehunter$(credentials as any, postMock as any)(episode as any);
+  scheduler.expectObservable(obs).toBe('---#', undefined, new Unauthorized());
+  scheduler.flush();
+});
+
+test('scrobbleToEpisodehunter$ should retry if emitting an Error', () => {
+  const scheduler = createRxTestScheduler();
+  const ehToken = 'hej';
+  const credentials = { ehToken };
+  const error = { status: 500 };
+  const episode = {
+    playState: 'stopped'
+  };
+  const posting$ = scheduler.createColdObservable('---#', undefined, error);
+  const postMock = spy(() => post('', {}, {}, retryOnServerError(Unauthorized, 10, scheduler), () => posting$));
+
+  // Act
+  const obs = scrobbleToEpisodehunter$(credentials as any, postMock as any)(episode as any);
+  scheduler.expectObservable(obs).toBe('-----------#', undefined, new Error());
+  scheduler.flush();
+});
+
+test('scrobbleToEpisodehunter$ should retry after one failure and unsubscribe after success', () => {
+  const scheduler = createRxTestScheduler();
+  const ehToken = 'hej';
+  const credentials = { ehToken };
+  const episode = {
+    playState: 'stopped'
+  };
+  const source = scheduler.createHotObservable('---1--2|');
+  const posting$ = source.map(x => {
+    if (x === '1') {
+      throw { status: 500 };
+    }
+    return x;
+  });
+  const postMock = spy(() => post('', {}, {}, retryOnServerError(Unauthorized, 0, scheduler), () => posting$));
+
+  // Act
+  const obs = scrobbleToEpisodehunter$(credentials as any, postMock as any)(episode as any);
+  scheduler.expectObservable(obs).toBe('------2|');
+  scheduler.expectSubscriptions(source.subscriptions).toBe(['^--!', '---^---!']);
   scheduler.flush();
 });
