@@ -106,6 +106,7 @@ export const watching$ = (credentials: Credentials, log, event$ = plexEvents$, m
     .concatMap(episode => {
       return scrobble$(credentials)(episode)
         .catch(error => {
+          log.error(error);
           return Observable.of(null);
         });
     });
