@@ -85,12 +85,12 @@ export const scrobbleToEpisodehunter$ = (credentials: Credentials, _post = post)
 
 const hasWatchedShow = (show: Show) => show.viewOffset / show.duration > .7;
 
-export const watching$ = (credentials: Credentials, log, event$ = plexEvents$, metadata$ = mediaMetadata$, scrobble$ = scrobbleToEpisodehunter$) => {
+export const watching$ = (credentials: Credentials, log, event$ = plexEvents$, metadata$ = mediaMetadata$, scrobble$ = scrobbleToEpisodehunter$, debounceTime = 1000, scheduler?) => {
   return event$(credentials)
     .do(() => log.info('Has the user stopt playing?'))
     .filter(hasStoptPlayingEvent)
     .do(() => log.info('Yepp, lets wait for a while'))
-    .debounceTime(1000)
+    .debounceTime(debounceTime, scheduler)
     .switchMap((plexEvent: PlexEvent) => {
       log.info('Get meta data for the show');
       return metadata$(credentials)(getSessionKey(plexEvent))
@@ -103,7 +103,12 @@ export const watching$ = (credentials: Credentials, log, event$ = plexEvents$, m
     .do(() => log.info('Is it a new show?'))
     .distinctUntilChanged(sameShow)
     .do(() => log.info('Mark it as waiched!'))
-    .concatMap(scrobble$(credentials));
+    .concatMap(episode => {
+      return scrobble$(credentials)(episode)
+        .catch(error => {
+          return Observable.of(null);
+        });
+    });
 };
 
 export function satisfiedCredentials$() {

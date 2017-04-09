@@ -137,6 +137,102 @@ test('scrobble after start and stop event', () => {
   scheduler.flush();
 });
 
+test('should continue after scrobble failure', () => {
+  // Arrange
+  const scheduler = createRxTestScheduler();
+  const startEvent = {
+    NotificationContainer: {
+      type: 'playing',
+      PlaySessionStateNotification: [{
+        state: 'start'
+      }]
+    }
+  };
+  const stopEvent = {
+    NotificationContainer: {
+      type: 'playing',
+      PlaySessionStateNotification: [{
+        state: 'stopped',
+        viewOffset: 2610149
+      }]
+    }
+  };
+  const credentials = {
+    plexToken: 'plex-token',
+    ehToken: 'eh-token',
+    host: 'plex-host',
+    port: 8080
+  };
+  const vikingsMetadata = {
+    MediaContainer: {
+      Metadata: [{
+        guid: 'com.plexapp.agents.thetvdb://260449/4/18?lang=en',
+        type: 'episode',
+        title: 'Revenge',
+        index: 18,
+        parentIndex: 4,
+        year: 2017,
+        duration: 2610149
+      }]
+    }
+  };
+  const vikingsMetadata2 = {
+    MediaContainer: {
+      Metadata: [{
+        guid: 'com.plexapp.agents.thetvdb://260449/4/19?lang=en',
+        type: 'episode',
+        title: 'Revenge2',
+        index: 19,
+        parentIndex: 4,
+        year: 2017,
+        duration: 2610149
+      }]
+    }
+  };
+  const viking = {
+    theTvDbId: '260449',
+    season: '4',
+    episode: '19',
+    duration: 2610149,
+    viewOffset: 2610149
+  };
+  const logger = { info: () => {} };
+
+  const eventValues = { a: startEvent, b: stopEvent };
+  const credentialsChange$ = scheduler.createHotObservable('-a-', {a: credentials});
+  const events$ = scheduler.createHotObservable(           '-a--a-b--b-', eventValues);
+  const metadata$ = scheduler.createHotObservable(         '-------a----b|', { a: vikingsMetadata, b: vikingsMetadata2 });
+  const scrobbleError$ = scheduler.createColdObservable(   '--#');
+  const scrobbleSuccess$ = scheduler.createColdObservable( '--a|');
+  let scrobbleTries = 0;
+
+  const events = cred => events$;
+  const metadata = () => () => metadata$;
+  const scrobble = () => show => {
+    if (scrobbleTries === 0) {
+      scrobbleTries = 1;
+      return scrobbleError$;
+     } else {
+      return scrobbleSuccess$.map(() => show);
+     }
+  };
+
+  const watchingMock$ = watching$(credentials as any, logger, events, metadata, scrobble, 0, scheduler);
+
+  const expected = '---------1----2';
+  const showValues = {1: null, 2: viking};
+
+  // Act
+  const obs = credentialsChange$.switchMap(cred => {
+    return watchingMock$;
+  });
+
+  // Assert
+  scheduler.expectSubscriptions(events$.subscriptions).toBe(['-^-']);
+  scheduler.expectObservable(obs).toBe(expected, showValues);
+  scheduler.flush();
+});
+
 test('scrobbleToEpisodehunter$ should emit values when it goes well', () => {
   const scheduler = createRxTestScheduler();
   const ehToken = 'hej';
