@@ -6,7 +6,7 @@ export function requestNewIdToken(idToken: string, _post = post): Observable<str
   const url = `https://episodehunter.auth0.com/delegation`;
   const header = { 'Content-Type': 'application/json' };
   const body = {
-    client_id: 'VsaZiNxg8B4eK2mxmcjOI4y1v0A9ZGPL',
+    client_id: 'S0B1JLjaL8Qfmwjw291jqWj08bFjORfP',
     grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
     id_token: idToken,
     scope: 'openid'

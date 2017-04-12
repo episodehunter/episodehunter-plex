@@ -13,7 +13,7 @@ export function createEpisodehunterLock(cb) {
       },
       auth: {
         params: {
-          scope: 'openid email user_id'
+          scope: 'openid'
         },
         redirect: false,
         sso: false
