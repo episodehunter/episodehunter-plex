@@ -3,7 +3,7 @@ import { Observable } from 'rxjs/Observable';
 import { retryOnServerError } from './util';
 import { Unauthorized } from './errors/unauthorized';
 
-export function post<R>(url, body, header, retry = retryOnServerError(Unauthorized, 1000), _post = ajax.post ): Observable<{status: number; response: R}> {
+export function post<R>(url, body, header, retry = retryOnServerError(Unauthorized, 1000), _post = ajax.post): Observable<{status: number; response: R}> {
   return _post(url, body, header)
     .catch(response => {
       const status = response.status;

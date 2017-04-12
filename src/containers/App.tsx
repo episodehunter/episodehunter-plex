@@ -24,11 +24,9 @@ export default class App extends React.Component<void, Partial<ApplicationState>
   componentWillMount() {
     this.subscriptions.push(
       this.credentialsChange$
-        .do(() => log.info('The credentials has changed, lets wait'))
+        .do(() => log.info('The credentials has changed, check them'))
         .debounceTime(10)
-        .do(d => log.info('Check satisfiedCredentials$', JSON.stringify(d)))
         .let(satisfiedCredentials$())
-        .do(() => log.info('The credentails seems OK. Lets check them'))
         .switchMap(checkCredentials$(
           this.setPlexCredentials,
           this.setPlexConnectionStatus,
@@ -37,21 +35,16 @@ export default class App extends React.Component<void, Partial<ApplicationState>
         ))
         .switchMap(credentials => {
           if (credentials === null) {
-            log.info('The credentials is not okey, bailout');
+            log.info('The check failed, bailout');
             return Observable.never();
           } else {
-            log.info('The credentials is okey, switch to watch mode');
+            log.info('The credentials are okey, switch to watch mode');
             return watching$(credentials, log);
           }
         })
-        .catch(error => {
-          log.error(error);
-          throw error;
-        })
-        .retry()
         .subscribe(
-          show => log.info('Scrobble: ', show),
-          error => log.error('Scrobble error: ', error),
+          show => log.info('Scrobble: ' + show),
+          error => log.error('Scrobble error: ' + error),
           () => log.error('Scrobble is done and done')
         ),
       renewEhToken(() => this.state.episodehunter.token).subscribe(this.setEpisodehunterToken)
