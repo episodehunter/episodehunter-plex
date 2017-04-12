@@ -1,14 +1,13 @@
 import * as React from 'react';
-const log = require('electron').remote.require('electron-log');
 import { Subscription } from 'rxjs/Subscription';
 import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
+import { createLogger } from '../lib/log';
 import { LoginRow, PlexLogin, SyncStatus, PlexServerCredentials, Overlay } from '../components';
 import { createEpisodehunterLock, config, renewEhToken, requestNewIdToken as requestNewEhToken, satisfiedCredentials$, watching$, checkCredentials$ } from '../lib';
 import { ApplicationState, ViewType, StatusType } from '../types';
 
-log.transports.console.level = 'info';
-log.transports.file.level = 'info';
+const log = createLogger();
 
 export default class App extends React.Component<void, Partial<ApplicationState>> {
   showEpisodehunterLock;
@@ -41,7 +40,7 @@ export default class App extends React.Component<void, Partial<ApplicationState>
             return Observable.never();
           } else {
             log.info('The credentials is okey, switch to watch mode');
-            return watching$(credentials);
+            return watching$(credentials, log);
           }
         })
         .catch(error => {
