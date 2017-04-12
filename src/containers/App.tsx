@@ -31,6 +31,7 @@ export default class App extends React.Component<void, Partial<ApplicationState>
         .do(() => log.info('The credentails seems OK. Lets check them'))
         .switchMap(checkCredentials$(
           this.setPlexCredentials,
+          this.setPlexConnectionStatus,
           this.setEpisodehunterToken,
           this.setErrorMessage
         ))
@@ -93,6 +94,10 @@ export default class App extends React.Component<void, Partial<ApplicationState>
   setPlexCredentials = (username, token) => {
     this.setState({plex: {username, token}});
     this.resetView();
+  }
+  setPlexConnectionStatus = connection => {
+    const plexServer = Object.assign({}, this.state.plexServer, { connection });
+    this.setState({ plexServer });
   }
   setPlexServerConfig = (host, port) => {
     this.setState({plexServer: {host, port, connection: true}});

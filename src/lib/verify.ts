@@ -26,6 +26,7 @@ export const isCredentialsCollected = (credentials: Credentials) => objectValues
 
 export function checkCredentials$(
   setPlexCredentials: (username: string, token: string) => void,
+  setPlexConnectionStatus: (connection) => void,
   setEpisodehunterToken: (token: string) => void,
   setErrorMessage: (error: string) => void
 ): (credentials: Credentials) => Observable<Credentials | null> {
@@ -36,6 +37,7 @@ export function checkCredentials$(
         setPlexCredentials('', null);
         setErrorMessage('Could not connect to your plex server, please try to update your credentials');
       } else {
+        setPlexConnectionStatus(false);
         setErrorMessage('Could not connect to your plex server, please check your connection options');
       }
 
