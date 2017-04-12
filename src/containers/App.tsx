@@ -58,7 +58,7 @@ export default class App extends React.Component<void, Partial<ApplicationState>
     );
 
     if (this.state.episodehunter.token) {
-      requestNewEhToken(this.state.episodehunter.token, undefined, e$ => e$.map(e => { throw e; }))
+      requestNewEhToken(this.state.episodehunter.token)
         .catch(() => Observable.of(null))
         .subscribe(
           token => {
