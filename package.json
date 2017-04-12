@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --watch",
+    "test:ci": "jest",
     "start": "tsc && cp app-bridge.js logo.png index.html dist && electron ."
   },
   "keywords": [
