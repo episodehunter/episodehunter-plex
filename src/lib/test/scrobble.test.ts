@@ -133,7 +133,7 @@ describe('watching$', () => {
   const viking2 = Object.assign({}, viking, {
     episode: '19'
   });
-  const logger = { info: () => {}, error: () => {} };
+  const logger = { info: () => null, error: () => null };
 
   test('scrobble after start and stop event', () => {
     // Arrange
