@@ -5,7 +5,7 @@ import { Subscription } from 'rxjs/Subscription';
 import { ajax } from 'rxjs/observable/dom/ajax';
 import { Overlay } from './Overlay';
 
-type PlexServerCredentialsProps = {host: string, port: number, plexToken: string, onSucess: (host, port) => void, onCancel: () => void};
+type PlexServerCredentialsProps = {host: string, port: number, plexToken: string, connection: boolean; onSucess: (host, port) => void, onCancel: () => void};
 type PlexServerCredentialsState = {host: string, port: number, loading: boolean, errorMsg: string};
 
 export class PlexServerCredentials extends React.Component<PlexServerCredentialsProps, Partial<PlexServerCredentialsState>> {

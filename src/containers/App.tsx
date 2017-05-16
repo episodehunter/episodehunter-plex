@@ -16,37 +16,40 @@ export default class App extends React.Component<void, Partial<ApplicationState>
 
   constructor() {
     super();
-    log.info('Starting episodehunter-plex!');
+    log.info('Starting...');
     this.state = Object.assign(config.get(), { loading: true, currentView: ViewType.start });
     this.showEpisodehunterLock = createEpisodehunterLock(token => this.setState({episodehunter: {token}}));
   }
 
+  scrobble$() {
+    return this.credentialsChange$
+      .do(() => log.info('Credentials has changed'))
+      .debounceTime(10)
+      .let(satisfiedCredentials$())
+      .switchMap(checkCredentials$(
+        this.setPlexCredentials,
+        this.setPlexConnectionStatus,
+        this.setEpisodehunterToken,
+        this.setErrorMessage
+      ))
+      .switchMap(credentials => {
+        if (credentials === null) {
+          log.info('Credentials was not okey');
+          return Observable.never();
+        } else {
+          log.info('Credentials is OK, lets chitch to the watching stream');
+          return watching$(credentials, log);
+        }
+      });
+  }
+
   componentWillMount() {
     this.subscriptions.push(
-      this.credentialsChange$
-        .do(() => log.info('The credentials has changed, check them'))
-        .debounceTime(10)
-        .let(satisfiedCredentials$())
-        .switchMap(checkCredentials$(
-          this.setPlexCredentials,
-          this.setPlexConnectionStatus,
-          this.setEpisodehunterToken,
-          this.setErrorMessage
-        ))
-        .switchMap(credentials => {
-          if (credentials === null) {
-            log.info('The check failed, bailout');
-            return Observable.never();
-          } else {
-            log.info('The credentials are okey, switch to watch mode');
-            return watching$(credentials, log);
-          }
-        })
-        .subscribe(
-          show => log.info('Scrobble: ' + show),
-          error => log.error('Scrobble error: ' + error),
-          () => log.error('Scrobble is done and done')
-        ),
+      this.scrobble$().subscribe(
+        () => log.info('Scobble!'),
+        error => log.error(error),
+        () => log.error('Shutting down')
+      ),
       renewEhToken(() => this.state.episodehunter.token).subscribe(this.setEpisodehunterToken)
     );
 
@@ -57,6 +60,9 @@ export default class App extends React.Component<void, Partial<ApplicationState>
           token => {
             this.setEpisodehunterToken(token);
             this.setState({loading: false});
+            if (!token) {
+              this.setState({error: 'Could not login to episodehunter.tv, please try again'});
+            }
           }
         );
     } else {

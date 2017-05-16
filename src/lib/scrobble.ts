@@ -87,11 +87,11 @@ const hasWatchedShow = (show: Show) => show.viewOffset / show.duration > .7;
 
 export const watching$ = (credentials: Credentials, log, event$ = plexEvents$, metadata$ = mediaMetadata$, scrobble$ = scrobbleToEpisodehunter$, debounceTime = 1000, scheduler?) => {
   return event$(credentials)
-    .do(() => log.info('Okej, the user is doing somthing'))
+    .do(() => log.info('Plex server is doing someting'))
     .filter(hasStoptPlayingEvent)
     .debounceTime(debounceTime, scheduler)
     .switchMap((plexEvent: PlexEvent) => {
-      log.info('Alright, the user has stopt plaing, lets get meta data for the show');
+      log.info('Alright, the user has stopt playing, lets get meta data for the show');
       return metadata$(credentials)(getSessionKey(plexEvent))
         .filter(watchingEpisode)
         .map(mapMetadataToShow)
