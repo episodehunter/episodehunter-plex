@@ -1,7 +1,4 @@
-import { ViewType } from './enums';
-
 export interface ApplicationState {
-  loading: boolean;
   plex: {
     username: string;
     token: string;
@@ -14,6 +11,4 @@ export interface ApplicationState {
     port: number;
     connection: boolean;
   };
-  currentView: ViewType;
-  error: string;
 };

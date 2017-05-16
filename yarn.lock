@@ -1500,6 +1500,10 @@ hoek@2.x.x:
   version "2.16.3"
   resolved "https://registry.yarnpkg.com/hoek/-/hoek-2.16.3.tgz#20bb7403d3cea398e91dc4710a8ff1b8274a25ed"
 
+hoist-non-react-statics@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/hoist-non-react-statics/-/hoist-non-react-statics-1.2.0.tgz#aa448cf0986d55cc40773b17174b7dd066cb7cfb"
+
 home-or-tmp@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/home-or-tmp/-/home-or-tmp-2.0.0.tgz#e36c3f2d2cae7d746a857e38d18d5f32a7882db8"
@@ -2485,6 +2489,16 @@ mksnapshot@^0.3.0:
     decompress-zip "0.3.0"
     fs-extra "0.26.7"
     request "2.55.0"
+
+mobx-react@^4.1.8:
+  version "4.1.8"
+  resolved "https://registry.yarnpkg.com/mobx-react/-/mobx-react-4.1.8.tgz#5b636c01c599bbee248c05c5aab6c77a41ab07f9"
+  dependencies:
+    hoist-non-react-statics "^1.2.0"
+
+mobx@^3.1.9:
+  version "3.1.9"
+  resolved "https://registry.yarnpkg.com/mobx/-/mobx-3.1.9.tgz#ed4af9d874ff6032c7af91fc1b87d9d33122a557"
 
 moment@2.x.x:
   version "2.18.1"

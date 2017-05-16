@@ -1,12 +1,11 @@
 import * as Config from 'electron-config';
-import { ApplicationState, ViewType } from '../types';
+import { ApplicationState } from '../types';
 
 const electronConfig = new Config();
 const configKey = 'state';
 
 function defaultModel(): ApplicationState {
   return {
-    loading: false,
     plex: {
       username: '',
       token: ''
@@ -18,14 +17,12 @@ function defaultModel(): ApplicationState {
       host: 'localhost',
       port: 32400,
       connection: false
-    },
-    currentView: ViewType.start,
-    error: ''
+    }
   };
 }
 
 const config = {
-  get() {
+  get(): ApplicationState {
     const state = electronConfig.get(configKey);
     if (!state) {
       const newState = defaultModel();
