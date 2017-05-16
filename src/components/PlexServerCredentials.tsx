@@ -71,7 +71,7 @@ export class PlexServerCredentials extends React.Component<PlexServerCredentials
          {this.state.errorMsg}
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <button onClick={() => this.checkClick$.next()}>Test connection</button>
+          <button onClick={() => this.checkClick$.next()}>Test & save</button>
           <button className="cancel" onClick={this.props.onCancel}>Cancel</button>
         </div>
       </div>
