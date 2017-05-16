@@ -68,10 +68,10 @@ const plexEvents$ = (credentials: Credentials) => {
 
 export const scrobbleToEpisodehunter$ = (credentials: Credentials, _post = post) => {
   const { ehToken } = credentials;
-  const url = `https://episodehunter-scrobble-ilrosnyqaq.now.sh/episode`;
+  const url = `https://stannis.episodehunter.tv/scrobble/episode`;
   const header = {
     'Content-Type': 'application/json',
-    'Authorization': 'bearer ' + ehToken
+    'Authorization': 'Bearer ' + ehToken
   };
   return (episode: Show) => {
     const body = {
