@@ -55,7 +55,7 @@ export default class App extends React.Component<void, void> {
           log.info('Credentials was not okey');
           return Observable.never();
         } else {
-          log.info('Credentials is OK, lets chitch to the watching stream');
+          log.info('Credentials is OK, lets switch to the watching stream');
           this.setErrorMessage('');
           return watching$(credentials, log);
         }
