@@ -4,6 +4,7 @@ import { Observable } from 'rxjs/Observable';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { observable, action, reaction, toJS } from 'mobx';
 import { observer } from 'mobx-react';
+import { ipcRenderer } from 'electron';
 import { createLogger } from '../lib/log';
 import { Credentials } from '../model/credentials';
 import { LoginRow, PlexLogin, SyncStatus, PlexServerCredentials, Overlay } from '../components';
@@ -37,6 +38,10 @@ export default class App extends React.Component {
     this.credentials = new Credentials(config.get());
     this.credentialsChange$ = new BehaviorSubject(createSimpleCredentials(this.credentials));
     this.showEpisodehunterLock = createEpisodehunterLock(this.credentials.setEpisodehunterToken);
+  }
+
+  quit() {
+    ipcRenderer.sendSync('request-quit');
   }
 
   scrobble$() {
@@ -149,14 +154,17 @@ export default class App extends React.Component {
     const plexServerStatus = this.credentials.plexServer.connection ? StatusType.Ok : StatusType.Warning;
 
     return (
-      <div style={{display: 'flex', flexFlow: 'column'}}>
-        {this.loading && <Overlay />}
-        <LoginRow status={episodehunterStatus} buttonText='Login to Episodehunter' onButtonClick={this.showEpisodehunterLock} />
-        <LoginRow status={plexStatus} buttonText='Login to Plex' onButtonClick={() => this.changeView(ViewType.plex)} />
-        <LoginRow status={plexServerStatus} buttonText='Connect to Plex' onButtonClick={() => this.changeView(ViewType.plexserver)} />
-        <div style={{flex: '1 1 auto', alignSelf: 'center'}}>
-          <SyncStatus error={this.errorMessage} />
+      <div>
+        <div style={{display: 'flex', flexFlow: 'column'}}>
+          {this.loading && <Overlay />}
+          <LoginRow status={episodehunterStatus} buttonText='Login to Episodehunter' onButtonClick={this.showEpisodehunterLock} />
+          <LoginRow status={plexStatus} buttonText='Login to Plex' onButtonClick={() => this.changeView(ViewType.plex)} />
+          <LoginRow status={plexServerStatus} buttonText='Connect to Plex' onButtonClick={() => this.changeView(ViewType.plexserver)} />
+          <div style={{flex: '1 1 auto', alignSelf: 'center'}}>
+            <SyncStatus error={this.errorMessage} />
+          </div>
         </div>
+        <div id="quit" title="Quit" onClick={this.quit}>❌</div>
       </div>
     );
   }
