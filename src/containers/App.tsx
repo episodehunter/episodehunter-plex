@@ -38,6 +38,7 @@ export default class App extends React.Component {
     this.credentials = new Credentials(config.get());
     this.credentialsChange$ = new BehaviorSubject(createSimpleCredentials(this.credentials));
     this.showEpisodehunterLock = createEpisodehunterLock(this.credentials.setEpisodehunterToken);
+    this.generateErrorMessage();
   }
 
   quit() {
@@ -118,14 +119,15 @@ export default class App extends React.Component {
 
   generateErrorMessage() {
     if (!this.credentials.episodehunter.token) {
-      this.setErrorMessage('Could not login to episodehunter.tv, please try again');
+      this.setErrorMessage('Please login to episodehunter.tv');
     } else if (!this.credentials.plex.token) {
-      this.setErrorMessage('Could not login to plex.tv, please try again');
+      this.setErrorMessage('Please login to plex.tv');
     } else if (!this.credentials.plexServer.connection) {
-      this.setErrorMessage('Could not login to your plex server, please try again');
+      this.setErrorMessage('Could not login to your plex server');
+    } else {
+      this.setErrorMessage('');
     }
   }
-
 
   renderPlexLogin() {
     return (
