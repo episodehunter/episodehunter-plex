@@ -60,6 +60,9 @@
     "testEnvironment": "node"
   },
   "build": {
-    "appId": "tv.episodehunter.plex"
+    "appId": "tv.episodehunter.plex",
+    "directories": {
+      "output": "dist-build"
+    }
   }
 }
