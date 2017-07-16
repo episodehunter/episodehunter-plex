@@ -7,7 +7,7 @@
     "test": "jest --watch",
     "test:ci": "jest",
     "start": "tsc && cp app-bridge.js logo.png index.html dist && electron .",
-    "dist": "build --linux"
+    "dist": "build --linux --mac"
   },
   "keywords": [
     "plex",
