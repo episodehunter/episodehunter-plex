@@ -44,6 +44,7 @@ export class Credentials {
   setPlexServerConfig = (host, port) => {
     this.plexServer.host = host;
     this.plexServer.port = port;
+    this.setPlexConnectionStatus(true);
   }
 
 }
