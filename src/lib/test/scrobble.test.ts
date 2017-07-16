@@ -148,7 +148,7 @@ describe('watching$', () => {
     const showValues = {1: viking};
 
     // Act
-    const obs = watching$(credentials, logger, events$ as any, metadata$, scrobble$);
+    const obs = watching$(credentials, logger, events$ as any, metadata$, scrobble$ as any);
 
     // Assert
     scheduler.expectObservable(obs).toBe(expected, showValues);
@@ -221,7 +221,7 @@ test('scrobbleToEpisodehunter$ should not retry if emitting an Unauthorized erro
     playState: 'stopped'
   };
   const posting$ = scheduler.createColdObservable('---#', undefined, error);
-  const postMock = spy(() => post('', {}, {}, undefined, () => posting$));
+  const postMock = spy(() => post('', {}, {}, undefined, () => posting$ as any));
 
   // Act
   const obs = scrobbleToEpisodehunter$(credentials as any, postMock as any)(episode as any);
@@ -238,7 +238,7 @@ test('scrobbleToEpisodehunter$ should retry if emitting an Error', () => {
     playState: 'stopped'
   };
   const posting$ = scheduler.createColdObservable('---#', undefined, error);
-  const postMock = spy(() => post('', {}, {}, retryOnServerError(Unauthorized, 10, scheduler), () => posting$));
+  const postMock = spy(() => post('', {}, {}, retryOnServerError(Unauthorized, 10, scheduler), () => posting$ as any));
 
   // Act
   const obs = scrobbleToEpisodehunter$(credentials as any, postMock as any)(episode as any);
@@ -260,7 +260,7 @@ test('scrobbleToEpisodehunter$ should retry after one failure and unsubscribe af
     }
     return x;
   });
-  const postMock = spy(() => post('', {}, {}, retryOnServerError(Unauthorized, 0, scheduler), () => posting$));
+  const postMock = spy(() => post('', {}, {}, retryOnServerError(Unauthorized, 0, scheduler), () => posting$ as any));
 
   // Act
   const obs = scrobbleToEpisodehunter$(credentials as any, postMock as any)(episode as any);

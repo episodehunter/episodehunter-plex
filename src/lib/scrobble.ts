@@ -64,7 +64,7 @@ const mediaMetadata$ = (credentials: Credentials) => {
 const plexEvents$ = (credentials: Credentials) => {
   return webSocket(createPlexServerUrl(credentials))
     .retryWhen(error$ => error$.delay(5000));
-}
+};
 
 export const scrobbleToEpisodehunter$ = (credentials: Credentials, _post = post) => {
   const { ehToken } = credentials;

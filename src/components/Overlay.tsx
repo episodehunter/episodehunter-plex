@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-const style = {
+const style: React.CSSProperties = {
   zIndex: 100,
   height: '100%',
   width: '100%',

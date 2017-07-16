@@ -8,9 +8,9 @@ export function post<R>(url, body, header, retry = retryOnServerError(Unauthoriz
     .catch(response => {
       const status = response.status;
       if (status === 401) {
-        throw new Unauthorized();
+        return Observable.throw(new Unauthorized());
       }
-      throw new Error();
+      return Observable.throw(new Error());
     })
     .retryWhen(retry);
 }

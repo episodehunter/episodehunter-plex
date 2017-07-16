@@ -22,7 +22,7 @@ function createSimpleCredentials(credentials: Credentials): SimpleCredentials {
 }
 
 @observer
-export default class App extends React.Component<void, void> {
+export default class App extends React.Component {
   showEpisodehunterLock;
   credentialsChange$: BehaviorSubject<SimpleCredentials>;
   subscriptions: Subscription[] = [];

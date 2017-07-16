@@ -41,7 +41,7 @@
     "ts-jest": "^19.0.5",
     "tslint": "^4.5.1",
     "tslint-react": "^2.5.0",
-    "typescript": "^2.2.1"
+    "typescript": "2.4.0"
   },
   "jest": {
     "transform": {

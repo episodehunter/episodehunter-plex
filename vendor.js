@@ -1,4 +1,5 @@
 require('rxjs/add/observable/concat');
+require('rxjs/add/observable/throw');
 require('rxjs/add/observable/of');
 require('rxjs/add/observable/timer');
 require('rxjs/add/operator/catch');
