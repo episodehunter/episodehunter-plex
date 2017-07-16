@@ -88,7 +88,7 @@ export default class App extends React.Component {
     reaction(
       () => this.credentials,
       credentials => {
-        log.into('Pushing new values on the subscription!');
+        log.info('Pushing new values on the subscription!');
         this.generateErrorMessage();
         config.set(toJS(credentials));
         this.credentialsChange$.next(createSimpleCredentials(credentials));
